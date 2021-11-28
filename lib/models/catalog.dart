@@ -1,23 +1,5 @@
 class CatalogModel {
-  static List<Item> items = [
-    Item(
-      id: 1,
-      name: "IPhone 12 Pro Max",
-      desc: "Gold,256GB Storage",
-      price: 129900,
-      color: '#33505a',
-      image:
-          "https://images-eu.ssl-images-amazon.com/images/I/41ixiUVfr0L._SY445_SX342_QL70_FMwebp_.jpg",
-    ),
-    Item(
-      id: 2,
-      name: "Redmi Note 10 Pro Max",
-      desc: "Dark Night, 6GB RAM, 128GB Storage",
-      price: 19999,
-      color: '#33505a',
-      image: "https://m.media-amazon.com/images/I/81Vpy0XrvFL._SL1500_.jpg",
-    )
-  ];
+  static List<Item> items = [];
 }
 
 class Item {
@@ -44,19 +26,15 @@ class Item {
       price: map["price"],
       color: map["color"],
       image: map["image"],
-
     );
   }
 
   toMap() => {
-    "id": id,
-    "name":name,
-    "desc":desc,
-    "price":price,
-    "color":color,
-    "image":image,
-
-  };
+        "id": id,
+        "name": name,
+        "desc": desc,
+        "price": price,
+        "color": color,
+        "image": image,
+      };
 }
-
-
