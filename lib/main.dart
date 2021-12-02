@@ -1,3 +1,4 @@
+import 'package:catalog/pages/cart_page.dart';
 import 'package:catalog/widgets/theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,13 +15,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       themeMode: ThemeMode.light,
-      theme: MyTheme.lightTheme(context),
+      theme: MyTheme.yellowTheme(context),
       darkTheme: MyTheme.darkTheme(context),
       initialRoute: "/",
       routes: {
         "/": (context) => HomePage(),
         MyRoutes.homeRoute: (context) => HomePage(),
         MyRoutes.loginRoute: (context) => LoginPage(),
+        MyRoutes.cartRoute:(context)=> MyCartPage(),
       },
     );
   }

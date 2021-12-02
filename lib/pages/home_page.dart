@@ -1,4 +1,8 @@
+import 'package:catalog/models/cart_model.dart';
 import 'package:catalog/models/catalog.dart';
+import 'package:catalog/pages/home_page_details.dart';
+import 'package:catalog/util/routes.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -19,24 +23,28 @@ class _HomePageState extends State<HomePage> {
   }
 
   loadData() async {
-    Future.delayed(Duration(seconds: 2));
+    await Future.delayed(Duration(seconds: 2));
     final catalogJson =
         await rootBundle.loadString("assets/files/catalog.json");
     final decodedData = jsonDecode(catalogJson);
     final productData = decodedData["products"];
     CatalogModel.items =
         List.from(productData).map<Item>((item) => Item.fromMap(item)).toList();
-    setState(() {
-
-    });
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, MyRoutes.cartRoute);
+        },
+        child: Icon(CupertinoIcons.shopping_cart),
+      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16,8,16,2),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 2),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -44,8 +52,10 @@ class _HomePageState extends State<HomePage> {
               if (CatalogModel.items != null && CatalogModel.items.isNotEmpty)
                 Expanded(child: CatalogList())
               else
-                Center(
-                  child: CircularProgressIndicator(),
+                Expanded(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
                 )
             ],
           ),
@@ -90,7 +100,12 @@ class _CatalogListState extends State<CatalogList> {
         itemCount: CatalogModel.items.length,
         itemBuilder: (context, index) {
           final catalog = CatalogModel.items[index];
-          return CatalogItem(catalog: catalog);
+          return InkWell(
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => HomePageDetails(catalog: catalog))),
+              child: CatalogItem(catalog: catalog));
         });
   }
 }
@@ -107,26 +122,77 @@ class CatalogItem extends StatelessWidget {
     return Card(
       child: Row(
         children: <Widget>[
-          CatalogImage(image: catalog.image),
+          Hero(
+              tag: Key(catalog.id.toString()),
+              child: CatalogImage(image: catalog.image)),
           Expanded(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 16,),
-              Text(catalog.name,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16.0),),
-              Text(catalog.desc,style: TextStyle(fontSize: 16,)),
+              SizedBox(
+                height: 16,
+              ),
+              Text(
+                catalog.name,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+              ),
+              Text(catalog.desc,
+                  style: TextStyle(
+                    fontSize: 16,
+                  )),
               ButtonBar(
                 alignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("\$${catalog.price}",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16),),
-                  ElevatedButton(onPressed: () {}, child: Text('Buy'))
+                  Text(
+                    "\$${catalog.price}",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  AddToCart(
+                    catalog: catalog,
+                  ),
+
                 ],
               )
             ],
           ))
         ],
       ),
+    );
+  }
+}
+
+class AddToCart extends StatefulWidget {
+  final Item catalog;
+
+  const AddToCart({Key? key, required this.catalog}) : super(key: key);
+
+  @override
+  _AddToCartState createState() => _AddToCartState();
+}
+
+class _AddToCartState extends State<AddToCart> {
+  
+  final _cart = CartModel();
+  
+  @override
+  Widget build(BuildContext context) {
+    bool isInCart = _cart.items.contains(widget.catalog);
+    return ElevatedButton(
+      onPressed: () {
+        if(!isInCart) {
+          isInCart ? isInCart = false : isInCart = true;
+          final _catalog = CatalogModel();
+          _cart.catalog = _catalog;
+          _cart.add(widget.catalog);
+          setState(() {});
+        }else{
+          _cart.remove(widget.catalog);
+          setState(() {});
+        }
+      },
+      style: ButtonStyle(shape: MaterialStateProperty.all(StadiumBorder())),
+      child: isInCart ? Icon(Icons.done) : Text("Add to cart"),
     );
   }
 }
@@ -139,8 +205,12 @@ class CatalogImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12.0,2.0,12.0,2.0),
-      child: Image.network(image,fit: BoxFit.cover,width: 60,),
+      padding: const EdgeInsets.fromLTRB(12.0, 2.0, 12.0, 2.0),
+      child: Image.network(
+        image,
+        fit: BoxFit.cover,
+        width: 60,
+      ),
     );
   }
 }
